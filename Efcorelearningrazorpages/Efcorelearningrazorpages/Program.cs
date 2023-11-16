@@ -23,7 +23,7 @@ else
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<SchoolContext>();
-       // context.Database.EnsureCreated();
+        context.Database.EnsureCreated();
         if (context.Students.Any())
         {
 
