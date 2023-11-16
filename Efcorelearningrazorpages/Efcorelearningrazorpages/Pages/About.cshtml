@@ -1,0 +1,20 @@
+﻿@page
+@model Efcorelearningrazorpages.Pages.AboutModel
+@{
+    ViewData["Title"] = "Student staticts";
+}
+<table border="1">
+    <tr>
+        Enrollment date
+    </tr>
+    <tr>
+        Student count
+    </tr>
+    @foreach (var item in Model.students)
+    {
+        <tr>
+            <td>@item.EnrollmentDate</td>
+            <td>@item.StudentCount</td>
+        </tr>
+    }
+</table>

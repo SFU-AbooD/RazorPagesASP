@@ -1,0 +1,93 @@
+﻿@page
+@model Efcorelearningrazorpages.Pages.Students.IndexModel
+
+@{
+    ViewData["Title"] = "Students";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<form method="get">
+    <input type="search" asp-page="./Index" asp-route-sort_asc="@Model.sort_asc" name="searchstring" value="@Model.searchstring">
+    <input type="submit" />
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @if ((Model.sort_asc != null) && Math.Abs((int)Model.sort_asc) == 1)
+                {
+                    <a asp-page="./Index" asp-route-current_filter="@Model.searchstring" asp-route-pageindex="@(Model.Student.PageIndex)" asp-route-sort_asc="@(Model.sort_asc * -1)">@Html.DisplayNameFor(model => model.Student[0].lastname)</a>
+                }
+                else
+                {
+                    <a asp-page="./Index" asp-route-current_filter="@Model.searchstring" asp-route-pageindex="@(Model.Student.PageIndex)"  asp-route-sort_asc="1">@Html.DisplayNameFor(model => model.Student[0].lastname)</a>
+                }
+            </th>
+            <th>
+                @if ((Model.sort_asc != null) && Math.Abs((int)Model.sort_asc) == 2)
+                {
+                    <a asp-page="./Index" asp-route-current_filter="@Model.searchstring" asp-route-pageindex="@(Model.Student.PageIndex)"  asp-route-sort_asc="@(Model.sort_asc * -1)">@Html.DisplayNameFor(model => model.Student[0].firstmidname)</a>
+                }
+                else
+                {
+                    <a asp-page="./Index" asp-route-current_filter="@Model.searchstring" asp-route-pageindex="@(Model.Student.PageIndex)"  asp-route-sort_asc="2">@Html.DisplayNameFor(model => model.Student[0].firstmidname)</a>
+                }
+            </th>
+            <th>
+                @if ((Model.sort_asc != null) && Math.Abs((int)Model.sort_asc) == 3)
+                {
+                    <a asp-page="./Index" asp-route-current_filter="@Model.searchstring" asp-route-pageindex="@(Model.Student.PageIndex)" asp-route-sort_asc="@(Model.sort_asc * -1)"> @Html.DisplayNameFor(model => model.Student[0].EnrollmentDate)</a>
+                }
+                else
+                {
+                    <a asp-page="./Index" asp-route-current_filter="@Model.searchstring" asp-route-pageindex="@(Model.Student.PageIndex)"  asp-route-sort_asc="3">@Html.DisplayNameFor(model => model.Student[0].EnrollmentDate)</a>
+                }
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Student) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.lastname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.firstmidname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EnrollmentDate)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.ID">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.ID">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.ID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+    </tbody>
+</table>
+@{
+    var prevDisabled = !Model.Student.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Student.HasNextPage ? "disabled" : "";
+}
+
+<a asp-page="./Index"
+   asp-route-sort_asc="@Model.sort_asc"
+   asp-route-pageindex="@(Model.Student.PageIndex - 1)"
+   asp-route-current_filter="@Model.searchstring"
+   class="btn btn-primary @prevDisabled">
+    Previous
+</a>
+<a asp-page="./Index"
+   asp-route-sort_asc="@Model.sort_asc"
+   asp-route-pageindex="@(Model.Student.PageIndex + 1)"
+   asp-route-current_filter="@Model.searchstring"
+   class="btn btn-primary @nextDisabled">
+    Next
+</a>
