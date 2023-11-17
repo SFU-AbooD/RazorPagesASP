@@ -71,10 +71,12 @@ namespace Efcorelearningrazorpages.Pages.Departments
             //departmentToUpdate.token = Department.token; this is so wrong since ef core will trigger the update command!
             _context.Entry<Department>(departmentToUpdate)
                 .Property(x => x.token).OriginalValue = Department.token;
+            // OriginalValue is what EF Core uses in the WHERE clause. Before the highlighted line of code executes 
+            // so for that ef core will issue any where clause using the original values!!
             // the orignal value is the value that is used for comparesion pracises like @p2 = original value for token
             // this will trick the ef core that this is the value that we got from database 
             // then ef core will issue a where clause for this whith the real value that updated in database!
-            if(await TryUpdateModelAsync<Department>(departmentToUpdate, "Department", s => s.Name, s => s.StartDate, s => s.Budget, s => s.InstructorID))
+            if (await TryUpdateModelAsync<Department>(departmentToUpdate, "Department", s => s.Name, s => s.StartDate, s => s.Budget, s => s.InstructorID))
               {
                 try {
                     await _context.SaveChangesAsync();
@@ -97,14 +99,16 @@ namespace Efcorelearningrazorpages.Pages.Departments
                         return Page();
                     }
                     var dbvalues = (Department)databaseEntry.ToObject();
-                    //await SetDbErrorMessage(dbValues, clientValues, _context);
+                    SetDbErrorMessages(dbvalues, clientValues);
                     Department.token = (byte[])dbvalues.token;
+                    // this is called cast!
                     // set the token back the token
-                    ModelState.Remove($"{nameof(Department)}.{nameof(Department.token)}"); 
+                    ModelState.Remove($"{nameof(Department)}.{nameof(Department.token)}");
+                    // we need to remove this since rendring engine will take a precedance of modelstate instead of Department property!
                 }
 
             }
-            InstructorNameSL = new(_context.Departments, "DepartmentID", "Name", departmentToUpdate.InstructorID);
+            InstructorNameSL = new SelectList(_context.Instructors, "ID", "FullName", Department.InstructorID);
             return Page();
         }
         private IActionResult HandleDeletedDepartment()
@@ -120,7 +124,7 @@ namespace Efcorelearningrazorpages.Pages.Departments
         {
           return (_context.Departments?.Any(e => e.DepartmentID == id)).GetValueOrDefault();
         }
-        private async Task SetDbErrormessagesI(Department dbvalues, Department clientvalues)
+        private void SetDbErrorMessages(Department dbvalues, Department clientvalues)
         {
             if (dbvalues.InstructorID != clientvalues.InstructorID)
             {

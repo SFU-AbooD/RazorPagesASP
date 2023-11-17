@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Efcorelearningrazorpages.Data;
 using Efcorelearningrazorpages.Models;
+using System.Data;
 
 namespace Efcorelearningrazorpages.Pages.Departments
 {
@@ -18,19 +19,27 @@ namespace Efcorelearningrazorpages.Pages.Departments
         {
             _context = context;
         }
+        public string ConcurrencyErrorMessage { get; set; }
 
         [BindProperty]
       public Department Department { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(int? id,bool ? concurrencyError)
         {
             if (id == null || _context.Departments == null)
             {
                 return NotFound();
             }
 
-            var department = await _context.Departments.FirstOrDefaultAsync(m => m.DepartmentID == id);
-
+            var department = await _context.Departments.Include(x=>x.Administrator).AsNoTracking().FirstOrDefaultAsync(m => m.DepartmentID == id);
+            if (concurrencyError.GetValueOrDefault())
+            {
+                ConcurrencyErrorMessage = "The record you attempted to delete "
+                  + "was modified by another user after you selected delete. "
+                  + "The delete operation was canceled and the current values in the "
+                  + "database have been displayed. If you still want to delete this "
+                  + "record, click the Delete button again.";
+            }
             if (department == null)
             {
                 return NotFound();
@@ -52,9 +61,19 @@ namespace Efcorelearningrazorpages.Pages.Departments
 
             if (department != null)
             {
-                Department = department;
-                _context.Departments.Remove(Department);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    // Department = department;
+                    if ((await _context.Departments.AnyAsync(x => x.DepartmentID == id)))
+                    {
+                        _context.Remove(department);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch(DBConcurrencyException) {
+                    return RedirectToPage("./Delete",
+             new { concurrencyError = true, id = id });
+                }
             }
 
             return RedirectToPage("./Index");
